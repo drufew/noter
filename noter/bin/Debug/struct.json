@@ -1,0 +1,10 @@
+	{
+		"styling": [
+			{
+				"parent" :  "styling",
+				"symbols": "symbols",
+				"colour": "colour",
+				"font": "font"
+			}
+		]
+	}	

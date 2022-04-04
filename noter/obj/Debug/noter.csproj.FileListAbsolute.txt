@@ -1,0 +1,14 @@
+C:\repos\noter\noter\obj\Debug\noter.csproj.AssemblyReference.cache
+C:\repos\noter\noter\obj\Debug\noter.csproj.SuggestedBindingRedirects.cache
+C:\repos\noter\noter\obj\Debug\noter.main_home.resources
+C:\repos\noter\noter\obj\Debug\noter.Properties.Resources.resources
+C:\repos\noter\noter\obj\Debug\noter.csproj.GenerateResource.cache
+C:\repos\noter\noter\obj\Debug\noter.csproj.CoreCompileInputs.cache
+C:\repos\noter\noter\bin\Debug\noter.exe.config
+C:\repos\noter\noter\bin\Debug\noter.exe
+C:\repos\noter\noter\bin\Debug\noter.pdb
+C:\repos\noter\noter\obj\Debug\noter.exe
+C:\repos\noter\noter\obj\Debug\noter.pdb
+C:\repos\noter\noter\bin\Debug\Newtonsoft.Json.dll
+C:\repos\noter\noter\bin\Debug\Newtonsoft.Json.xml
+C:\repos\noter\noter\obj\Debug\noter.csproj.CopyComplete
