@@ -1,0 +1,13 @@
+
+	 <div class="jumbotron" style="margin: ; vertical-align:middle; font-size: xx-large; font-weight: bold;"
+	        <h1>Enter Credentials</h1>
+	        </div>
+	
+	    <div class="credentials" align="center" >
+	        <p>What is your username?:</p>
+	            <asp:TextBox ID="txtUser" runat="server"/> 
+	        <p>What is your password?:</p>
+	        <asp:TextBox ID="txtPass" TextMode="Password" runat="server"/>
+	        <p></p>
+	        <asp:Button  ID="btnSubmit" runat="server" Text="Submit" BorderStyle="Solid" ToolTip="Submit" OnClick="btnSubmit_Click"/>   
+	        </div>

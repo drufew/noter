@@ -32,6 +32,50 @@ namespace noter.Classes.Functions
             return JsonConvert.DeserializeObject<DataTable>(trgArray.ToString());
         }
 
+        public static string LookupDictionary(string search, string path)
+        {
+            string returnFile = "";
+
+            if (string.IsNullOrEmpty(search))
+                search = "directory";
+
+            var jsonLinq = JObject.Parse(File.ReadAllText(path+ @"\dictionary\dictionary.json"));
+            var srcArray = jsonLinq.Descendants().Where(d => d is JArray).First();
+            var trgArray = new JArray();
+
+            try
+            {
+                foreach (JProperty element in jsonLinq.Children<JProperty>())
+                {
+                    var parent = (path + @"\" + element.Name);
+
+                    try
+                    {
+                        var childElements = element.Descendants().Where(d => d is JArray).First();
+
+                        foreach (JObject childElement in childElements.Children<JObject>())
+                        {
+                            foreach (JProperty property in childElement.Properties())
+                            {
+                                if (search.Split('.').Last() == property.Name)
+                                    returnFile = property.Value.ToString();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return returnFile;
+        }     
+
         public static void GenerateDirectoriesFromJson(string json, string path)
         {
             var jsonLinq = JObject.Parse(json);
@@ -47,17 +91,24 @@ namespace noter.Classes.Functions
                     if (!Directory.Exists(parent))
                         Directory.CreateDirectory(parent);
 
-                    var childElements = element.Descendants().Where(d => d is JArray).First();
-
-                    foreach(JObject childElement in childElements.Children<JObject>())
+                    try
                     {
-                        foreach (JProperty property in childElement.Properties())
-                        {
-                            var child = parent + @"\" + property.Value;
+                        var childElements = element.Descendants().Where(d => d is JArray).First();
 
-                            if (!Directory.Exists(child))
-                                Directory.CreateDirectory(child);
+                        foreach (JObject childElement in childElements.Children<JObject>())
+                        {
+                            foreach (JProperty property in childElement.Properties())
+                            {
+                                var child = parent + @"\" + property.Value;
+
+                                if (!Directory.Exists(child))
+                                    Directory.CreateDirectory(child);
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                 }
             }

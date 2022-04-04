@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,12 @@ namespace noter
         static string path = System.IO.Path.GetDirectoryName(
        System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Substring(6);
 
+        static string curPath = path + @"\content";
+
+        //pos
+        int pnlOrig;
+        int pbOrig;
+
         protected override void WndProc(ref Message message)
         {
             base.WndProc(ref message);
@@ -33,6 +40,7 @@ namespace noter
         {
             InitializeComponent();
             this.FormBorderStyle = FormBorderStyle.None;
+            this.DoubleBuffered = true;
         }
 
         private void main_home_Load(object sender, EventArgs e)
@@ -41,11 +49,10 @@ namespace noter
             Classes.Init.BuildStructure.BuildDirectories();
             var BoldOnHover = new Classes.Functions.BoldOnHover();
 
-            lblTitle.ForeColor = ColorTranslator.FromHtml("#191919");
-            pbSettings.Image = Image.FromFile(path + @"\symbols\16px\_settings.png");
-            pbSearchAll.Image = Image.FromFile(path + @"\symbols\16px\_spyglass.png");
-            lblSettings.ForeColor = ColorTranslator.FromHtml("#191919");
-            lblSearchAll.ForeColor = ColorTranslator.FromHtml("#191919");
+            Classes.Init.ConfigureDefaults.LoadMain(pbSettings, pbSearchAll, pbExpand, lblTitle, lblSettings, lblSearchAll, pnlSide, path);
+
+            pnlOrig = pnlSide.Width;
+            pbOrig = pbExpand.Location.X;
 
             foreach (var label in Classes.Functions.Extensions.GetAllChildren(this).OfType<Label>())
             {
@@ -53,11 +60,66 @@ namespace noter
                 label.MouseLeave += new EventHandler(BoldOnHover.OnMouseLeave);
             }
 
-            foreach(var file in Classes.Functions.Extensions.GetAllFilesInDirectory(path + @"\content"))
+            DataGridView dgvDir = Classes.Functions.Extensions.GenerateDataGrid(pnlSide,"");
+            dgvDir.CellDoubleClick += dgvDir_CellDoubleClick;
+        }
+        public void dgvDir_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
             {
-                dgvDir.Rows.Add(Image.FromFile(path + @"\symbols\8px\_rightarrow.png"), Image.FromFile(path + @"\symbols\8px\_rightarrow.png"), file.Split('\\').Last());
-            }
+                DataGridView dgvDir = (DataGridView)sender;
+                curPath += @"\" + dgvDir.CurrentCell.Value.ToString();
 
+                FileAttributes attr = System.IO.File.GetAttributes(curPath);
+
+                if(attr.ToString() == "Directory")
+                {
+                    foreach (Control dgv in pnlSide.Controls)
+                        if (dgv is DataGridView)
+                            pnlSide.Controls.Remove(dgv);
+
+                    dgvDir = Classes.Functions.Extensions.GenerateDataGrid(pnlSide, curPath);
+                    
+                }
+            }
+            catch (Exception ex)
+            { }
+        }
+
+        private void pbExpand_MouseEnter(object sender, EventArgs e)
+        {
+            pbExpand.Image = Image.FromFile(path + @"\symbols\16px\_expand_col.png");
+        }
+
+        private void pbExpand_MouseLeave(object sender, EventArgs e)
+        {
+            pbExpand.Image = Image.FromFile(path + @"\symbols\16px\_expand.png");
+        }
+
+        private void pbExpand_Click(object sender, EventArgs e)
+        {
+            if (pbOrig != pbExpand.Location.X)
+            {
+                pbExpand.Location = new Point(pbOrig, pbExpand.Location.Y);
+                pnlSide.Size = new Size(pnlOrig, pnlSide.Height);
+            }
+            else
+            {
+                foreach (Control control in pnlSide.Controls)
+                    if (control is DataGridView)
+                    {
+                        pbExpand.Visible = false;
+                        DataGridView dgvDir = (DataGridView)control;
+                        for (int z = pnlSide.Width; z < dgvDir.Columns[1].Width + 45; z += 20)
+                        {
+                            pnlSide.Size = new Size(pnlSide.Width += 20, pnlSide.Height);
+                            System.Threading.Thread.Sleep(1);
+                            int x = pbExpand.Location.X;
+                            pbExpand.Location = new Point(x += 20, pbExpand.Location.Y);
+                        }
+                        pbExpand.Visible = true;
+                    }
+            }
         }
     }
 }
