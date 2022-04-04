@@ -10,26 +10,7 @@ namespace noter.Classes.Init
 
         public static void BuildDirectories()
         {
-            DataTable dir = Classes.Functions.ConvertJSONToDataTable.Tabulate(File.ReadAllText(path + @"\struct.json"));
-
-            foreach(DataRow dr in dir.Rows)
-            {
-                var parent = (path + @"\" + dr[0]);
-
-                if(!Directory.Exists(parent))
-                    Directory.CreateDirectory(parent);
-
-                foreach(DataColumn col in dir.Columns)
-                {
-                    if(col.Ordinal!=0)
-                    {
-                        var child = (parent + @"\" + dr[col]);
-
-                        if(!Directory.Exists(child))
-                            Directory.CreateDirectory(parent + @"\" + dr[col]);
-                    }
-                }
-            }
+            Classes.Functions.JSONHandler.GenerateDirectoriesFromJson(File.ReadAllText(path + @"\struct.json"),path);
         }            
     }
 }

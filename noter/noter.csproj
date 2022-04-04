@@ -49,7 +49,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\Functions\ConvertJSONToDataTable.cs" />
+    <Compile Include="Classes\Functions\BoldOnHover.cs" />
+    <Compile Include="Classes\Functions\Extensions.cs" />
+    <Compile Include="Classes\Functions\JSONHandler.cs" />
     <Compile Include="Classes\Init\BuildStructure.cs" />
     <Compile Include="Classes\Init\DropShadow.cs" />
     <Compile Include="main_home.cs">

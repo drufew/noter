@@ -1,10 +1,17 @@
-	{
-		"styling": [
-			{
-				"parent" :  "styling",
-				"symbols": "symbols",
-				"colour": "colour",
-				"font": "font"
-			}
-		]
-	}	
+{
+	"styling": [
+		{			
+			"colour": "colour",
+			"font": "font"
+		}
+	],
+	"symbols": [
+		{
+			"8px": "8px",
+			"16px": "16px",
+			"32px": "32px",
+			"64px": "64px"
+		}
+	],
+	"content" :  "content"
+}	
