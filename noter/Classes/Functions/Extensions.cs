@@ -40,12 +40,13 @@ namespace noter.Classes.Functions
             dataGrid.ColumnHeadersVisible = false;
             dataGrid.DefaultCellStyle.BackColor = SystemColors.ControlLight;
             dataGrid.AllowUserToResizeRows = false;
+            dataGrid.ReadOnly = true;
 
             dataGrid.ColumnHeadersHeight = 23;
             dataGrid.GridColor = SystemColors.ControlLight;
             dataGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
 
-             dataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+             dataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGrid.DefaultCellStyle.SelectionBackColor = SystemColors.ControlLight;
             dataGrid.AllowUserToAddRows = false;
             dataGrid.ScrollBars = ScrollBars.None;
@@ -73,37 +74,62 @@ namespace noter.Classes.Functions
 
             panel.Controls.Add(dgvDir);
 
-            dgvDir.Size = new Size(250, 341);
-            dgvDir.Location = new Point(panel.Location.X+30, 120);
+            dgvDir.Size = new Size(550, 500);
+
+            dgvDir.Location = new Point(panel.Location.X+35, 120);
 
             return dgvDir;
         }
 
-        public static void AppendNewDirData(DataGridView dataGridView, string directory)
+        public static void AppendNewDirData(DataGridView dataGridView, string directory, string CurCel, bool collapse)
         {
             var backDirs = SplitDirectories(directory);
             int padding = backDirs.Count * 20;
+            bool breakLoop = false;
 
             foreach (DataGridViewRow row in dataGridView.Rows)
             {
-                if (GetDirectoryOfItem(row,dataGridView) == directory)
+                if (breakLoop)
+                    break;
+
+                if (GetDirectoryOfItem(row, dataGridView, CurCel) == directory)
                 {
                     int rowInd = row.Index + 1;
-                    foreach (var file in GetAllFilesInDirectory(directory))
-                    {
-                        CreateRow(dataGridView, file.ToString(), 1, rowInd, padding);
-                        rowInd++;
-                    }
 
-                    if(rowInd != row.Index + 1)
+                    if (collapse == false)
                     {
-                        break;
+                        foreach (var file in GetAllFilesInDirectory(directory))
+                        {
+                            CreateRow(dataGridView, file.ToString(), 1, rowInd, padding);
+                            rowInd++;
+                        }
+
+                        if (rowInd != row.Index + 1)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        for (int r = rowInd; r < dataGridView.Rows.Count; r++)
+                        {
+                            if (((Classes.Controls.TextAndImageCell)dataGridView.Rows[r].Cells[0]).Indent > ((Classes.Controls.TextAndImageCell)row.Cells[0]).Indent)
+                            {
+                                dataGridView.Rows.RemoveAt(r);
+                                r--;
+                            }
+                            else
+                            {
+                                breakLoop = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        public static string GetDirectoryOfItem(DataGridViewRow row, DataGridView dataGridView)
+        public static string GetDirectoryOfItem(DataGridViewRow row, DataGridView dataGridView, string selectedDir)
         {
             string directory = "";
             string dirBuilder = "";
@@ -114,11 +140,26 @@ namespace noter.Classes.Functions
             }
             else
             {
+                string parentFolder="";
+
                 for(int y = row.Index; y >= 0; y--)
                 {
-                    if(row.Cells[0].Tag == "Directory")
+                    string tagVal = dataGridView.Rows[y].Cells[0].Tag.ToString();
+
+                    if(parentFolder!="")
+                    {
+                        parentFolder = parentFolder.Split('\\').Last();
+                    }
+
+                    if ( tagVal.Remove(tagVal.LastIndexOf('?')) == "Directory" && dataGridView.Rows[y].Cells[0].Value == selectedDir)
                     {
                         dirBuilder = dataGridView.Rows[y].Cells[0].Value.ToString() + @"\" + dirBuilder;
+                        parentFolder = dataGridView.Rows[y].Cells[0].Tag.ToString().Split('?').Last();
+                    }
+                    else if (dataGridView.Rows[y].Cells[0].Value.ToString() == parentFolder)
+                    {
+                        dirBuilder = dataGridView.Rows[y].Cells[0].Value.ToString() + @"\" + dirBuilder;
+                        parentFolder = dataGridView.Rows[y].Cells[0].Tag.ToString().Split('?').Last();
                     }
                 }
             }
@@ -163,11 +204,13 @@ namespace noter.Classes.Functions
         {
             string fileExt = System.IO.Path.GetExtension(file);
 
-            Image image = Image.FromFile(path + @"\symbols\16px\" + Classes.Functions.JSONHandler.LookupDictionary(fileExt, path) + ".png");
+            Image image = Image.FromFile(path + @"\symbols\16px\" + Classes.Functions.JSONHandler.LookupDictionary(fileExt.ToLower(), path) + ".png");
 
             string fileName = file.Split('\\').Last().Split('.')[0];
 
-            if(fileExt=="")
+            var parentDir = file.Remove(file.LastIndexOf('\\'));
+
+            if (fileExt=="")
             {
                 fileExt = "Directory";
             }
@@ -184,7 +227,7 @@ namespace noter.Classes.Functions
 
 
                     dgvDir.Rows[pos].Cells[0].Style.Padding = new Padding(padding+15, 0, 0, 0);
-                    dgvDir.Rows[pos].Cells[0].Tag = fileExt;
+                    dgvDir.Rows[pos].Cells[0].Tag = fileExt+"?"+ parentDir;
                 }
                 else
                 {
@@ -192,7 +235,7 @@ namespace noter.Classes.Functions
                     ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Image = image;
                     ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Value = fileName;
 
-                    dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt;
+                    dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt + "?" + parentDir; ;
                 }
             }
             else
@@ -200,7 +243,7 @@ namespace noter.Classes.Functions
                 dgvDir.Rows.Add();
                 ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Image = image;
                 ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Value = fileName;
-                dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt;
+                dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt + "?" + parentDir; ;
             }                          
         }
 
@@ -209,7 +252,7 @@ namespace noter.Classes.Functions
             try
             {
                 DataGridView dgvDir = (DataGridView)sender;
-                dgvDir.Rows[e.RowIndex].Cells[1].Style.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+                dgvDir.Rows[e.RowIndex].Cells[0].Style.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             }
             catch (Exception ex)
             { }
@@ -219,7 +262,7 @@ namespace noter.Classes.Functions
             try
             {
                 DataGridView dgvDir = (DataGridView)sender;
-                dgvDir.Rows[e.RowIndex].Cells[1].Style.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+                dgvDir.Rows[e.RowIndex].Cells[0].Style.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             }
             catch (Exception ex)
             { }

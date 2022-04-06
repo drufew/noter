@@ -2,7 +2,8 @@
 	"styling": [
 		{			
 			"colour": "colour",
-			"font": "font"
+			"font": "font",
+			"background" :  "background"
 		}
 	],
 	"symbols": [

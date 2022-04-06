@@ -56,6 +56,7 @@
     <Compile Include="Classes\Init\BuildStructure.cs" />
     <Compile Include="Classes\Init\ConfigureDefaults.cs" />
     <Compile Include="Classes\Init\DropShadow.cs" />
+    <Compile Include="Classes\Tab Pages\GenerateTabPage.cs" />
     <Compile Include="main_home.cs">
       <SubType>Form</SubType>
     </Compile>

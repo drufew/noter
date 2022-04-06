@@ -62,20 +62,36 @@ namespace noter
 
             DataGridView dgvDir = Classes.Functions.Extensions.GenerateDataGrid(pnlSide,"");
             dgvDir.CellDoubleClick += dgvDir_CellDoubleClick;
+            dgvDir.ContextMenuStrip = cmMenuItems;
+
+            tbMain.SendToBack();
         }
         public void dgvDir_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             try
-            {               
+            {
                 DataGridView dgvDir = (DataGridView)sender;
-                curPath += @"\" + dgvDir.CurrentCell.Value.ToString();
+                curPath = dgvDir.CurrentCell.Tag.ToString().Split('?').Last() + @"\" + dgvDir.CurrentCell.Value.ToString();
+                string notDir = "";
+                notDir = dgvDir.CurrentCell.Tag.ToString().Split('?')[0];
 
+                if (notDir == "Directory") { 
                 FileAttributes attr = System.IO.File.GetAttributes(curPath);
 
-                if(attr.ToString() == "Directory")
+                if (attr.ToString() == "Directory")
                 {
-                    Classes.Functions.Extensions.AppendNewDirData(dgvDir, curPath);
+                    bool collapse = false;
+
+                    if (((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.CurrentRow.Index + 1].Cells[0]).Indent > ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.CurrentRow.Index].Cells[0]).Indent)
+                    {
+                        collapse = true;
+                    }
+
+                    Classes.Functions.Extensions.AppendNewDirData(dgvDir, curPath, dgvDir.CurrentCell.Value.ToString(), collapse);
                 }
+            }
+                if(notDir.ToString() == ".txt")
+                    Classes.Tab_Pages.GenerateTabPage.TabPage("file", tbMain, curPath+notDir);
             }
             catch (Exception ex)
             { }
@@ -115,6 +131,66 @@ namespace noter
                         pbExpand.Visible = true;
                     }
             }
+        }
+
+        private void lblSettings_Click(object sender, EventArgs e)
+        {
+            Classes.Tab_Pages.GenerateTabPage.TabPage("configuration", tbMain, "");            
+        }
+
+        private void pbBack_MouseEnter(object sender, EventArgs e)
+        {
+            pbBack.Image = Image.FromFile(path + @"\symbols\16px\_leftarrowcolour.png");
+        }
+
+        private void pbBack_MouseLeave(object sender, EventArgs e)
+        {
+            pbBack.Image = Image.FromFile(path + @"\symbols\16px\_leftarrow.png");
+        }
+
+        private void pbForward_MouseEnter(object sender, EventArgs e)
+        {
+            pbForward.Image = Image.FromFile(path + @"\symbols\16px\_rightarrowcolour.png");
+        }
+
+        private void pbForward_MouseLeave(object sender, EventArgs e)
+        {
+            pbForward.Image = Image.FromFile(path + @"\symbols\16px\_rightarrow.png");
+        }
+
+        private void pbClose_MouseEnter(object sender, EventArgs e)
+        {
+            pbClose.Image = Image.FromFile(path + @"\symbols\16px\_closecolour.png");
+        }
+
+        private void pbClose_MouseLeave(object sender, EventArgs e)
+        {
+            pbClose.Image = Image.FromFile(path + @"\symbols\16px\_close.png");
+        }
+
+        private void pbMinimise_MouseEnter(object sender, EventArgs e)
+        {
+            pbMinimise.Image = Image.FromFile(path + @"\symbols\16px\_minimisecolour.png");
+        }
+
+        private void pbMinimise_MouseLeave(object sender, EventArgs e)
+        {
+            pbMinimise.Image = Image.FromFile(path + @"\symbols\16px\_minimise.png");
+        }
+
+        private void pbMinimise_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void pbClose_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void dgvTabs_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
