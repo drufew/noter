@@ -45,9 +45,11 @@ namespace noter.Classes.Functions
             dataGrid.GridColor = SystemColors.ControlLight;
             dataGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
 
-            dataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+             dataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dataGrid.DefaultCellStyle.SelectionBackColor = SystemColors.ControlLight;
             dataGrid.AllowUserToAddRows = false;
+            dataGrid.ScrollBars = ScrollBars.None;
+            
         }
 
         public static DataGridView GenerateDataGrid(Panel panel, string subDir)
@@ -55,45 +57,154 @@ namespace noter.Classes.Functions
             DataGridView dgvDir = new DataGridView();
             SetDatagridStyle(dgvDir);
 
-            DataGridViewImageColumn clImage = new DataGridViewImageColumn();
-            DataGridViewTextBoxColumn clFile = new DataGridViewTextBoxColumn();
+            Classes.Controls.TextAndImageColumn clImage = new Classes.Controls.TextAndImageColumn();
 
             dgvDir.Columns.Add(clImage);
-            dgvDir.Columns.Add(clFile);
 
             dgvDir.CellMouseEnter += dgvDir_CellMouseEnter;
             dgvDir.CellMouseLeave += dgvDir_CellMouseLeave;
 
-            foreach (var file in GetAllFilesInDirectory(path + @"\content"))
-            {
-                CreateRow(dgvDir, file.ToString());
-                if (file == subDir)
+            List<string> backDirs = new List<string>();
+
+                foreach (var file in GetAllFilesInDirectory(path + @"\content"))
                 {
-                    foreach(var subFile in GetAllFilesInDirectory(subDir))
-                    {
-                        CreateRow(dgvDir, subFile.ToString());
-                    }
-                }              
-            }
+                    CreateRow(dgvDir, file.ToString(), 0, 0, 0);
+                }
 
             panel.Controls.Add(dgvDir);
 
-            dgvDir.Size = new Size(dgvDir.Columns[1].Width + 20, 341);
-            dgvDir.Location = new Point(20, 120);
+            dgvDir.Size = new Size(250, 341);
+            dgvDir.Location = new Point(panel.Location.X+30, 120);
 
             return dgvDir;
         }
 
-        private static void CreateRow(DataGridView dgvDir, string file)
+        public static void AppendNewDirData(DataGridView dataGridView, string directory)
+        {
+            var backDirs = SplitDirectories(directory);
+            int padding = backDirs.Count * 20;
+
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                if (GetDirectoryOfItem(row,dataGridView) == directory)
+                {
+                    int rowInd = row.Index + 1;
+                    foreach (var file in GetAllFilesInDirectory(directory))
+                    {
+                        CreateRow(dataGridView, file.ToString(), 1, rowInd, padding);
+                        rowInd++;
+                    }
+
+                    if(rowInd != row.Index + 1)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        public static string GetDirectoryOfItem(DataGridViewRow row, DataGridView dataGridView)
+        {
+            string directory = "";
+            string dirBuilder = "";
+
+            if(row.Cells[0].Style.Padding.Left==0)
+            {
+                directory = path + @"\content\"+row.Cells[1].Value;
+            }
+            else
+            {
+                for(int y = row.Index; y >= 0; y--)
+                {
+                    if(row.Cells[0].Tag == "Directory")
+                    {
+                        dirBuilder = dataGridView.Rows[y].Cells[0].Value.ToString() + @"\" + dirBuilder;
+                    }
+                }
+            }
+
+            if (dirBuilder != "")
+                directory = path + @"\content\" + dirBuilder.Remove(dirBuilder.Length - 1, 1);
+
+            return directory;
+        }
+
+        public static List<string> SplitDirectories(string directory)
+        {
+            List<string> backDirs = new List<string>();
+
+            string dir = directory;
+            int numberOfDirs = GetEverythingAfterValue(directory, "content").Split('\\').Length - 1;
+
+            for (int i = 0; i < numberOfDirs; i++)
+            {
+                dir = dir.Remove(dir.LastIndexOf('\\'));
+
+                    backDirs.Add(dir);
+            }
+
+            backDirs.Add(directory);
+
+            return
+                backDirs;
+        }
+
+        public static string GetEverythingAfterValue(string value, string search)
+        {
+            return value.Substring(value.LastIndexOf(search) + search.Length);
+        }
+
+        private static List<string> ConvertDelimitedList (string delimiter, string value)
+        {
+            return value.Split(char.Parse(delimiter)).ToList();            
+        }
+
+        private static void CreateRow(DataGridView dgvDir, string file, int type, int pos, int padding)
         {
             string fileExt = System.IO.Path.GetExtension(file);
 
-            var image = Image.FromFile(path + @"\symbols\16px\" + Classes.Functions.JSONHandler.LookupDictionary(fileExt, path) + ".png");
+            Image image = Image.FromFile(path + @"\symbols\16px\" + Classes.Functions.JSONHandler.LookupDictionary(fileExt, path) + ".png");
 
-            dgvDir.Rows.Add(image, file.Split('\\').Last().Split('.')[0]);
+            string fileName = file.Split('\\').Last().Split('.')[0];
+
+            if(fileExt=="")
+            {
+                fileExt = "Directory";
+            }
+
+            if (type == 1)
+            {
+                if (pos != 0)
+                {
+                    dgvDir.Rows.Insert(pos);                                   
+
+                    ((Classes.Controls.TextAndImageCell)dgvDir.Rows[pos].Cells[0]).Image = image;
+                    ((Classes.Controls.TextAndImageCell)dgvDir.Rows[pos].Cells[0]).Value = fileName;
+                    ((Classes.Controls.TextAndImageCell)dgvDir.Rows[pos].Cells[0]).Indent = padding;
+
+
+                    dgvDir.Rows[pos].Cells[0].Style.Padding = new Padding(padding+15, 0, 0, 0);
+                    dgvDir.Rows[pos].Cells[0].Tag = fileExt;
+                }
+                else
+                {
+                    dgvDir.Rows.Add();
+                    ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Image = image;
+                    ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Value = fileName;
+
+                    dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt;
+                }
+            }
+            else
+            {
+                dgvDir.Rows.Add();
+                ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Image = image;
+                ((Classes.Controls.TextAndImageCell)dgvDir.Rows[dgvDir.RowCount - 1].Cells[0]).Value = fileName;
+                dgvDir.Rows[dgvDir.RowCount - 1].Cells[0].Tag = fileExt;
+            }                          
         }
 
-        private static void dgvDir_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+            private static void dgvDir_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             try
             {

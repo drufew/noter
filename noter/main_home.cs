@@ -66,7 +66,7 @@ namespace noter
         public void dgvDir_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             try
-            {
+            {               
                 DataGridView dgvDir = (DataGridView)sender;
                 curPath += @"\" + dgvDir.CurrentCell.Value.ToString();
 
@@ -74,12 +74,7 @@ namespace noter
 
                 if(attr.ToString() == "Directory")
                 {
-                    foreach (Control dgv in pnlSide.Controls)
-                        if (dgv is DataGridView)
-                            pnlSide.Controls.Remove(dgv);
-
-                    dgvDir = Classes.Functions.Extensions.GenerateDataGrid(pnlSide, curPath);
-                    
+                    Classes.Functions.Extensions.AppendNewDirData(dgvDir, curPath);
                 }
             }
             catch (Exception ex)
@@ -110,7 +105,7 @@ namespace noter
                     {
                         pbExpand.Visible = false;
                         DataGridView dgvDir = (DataGridView)control;
-                        for (int z = pnlSide.Width; z < dgvDir.Columns[1].Width + 45; z += 20)
+                        for (int z = pnlSide.Width; z < dgvDir.Columns[0].Width + 45; z += 20)
                         {
                             pnlSide.Size = new Size(pnlSide.Width += 20, pnlSide.Height);
                             System.Threading.Thread.Sleep(1);

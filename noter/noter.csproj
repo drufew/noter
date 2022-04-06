@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Controls\TextAndImageColumn.cs" />
     <Compile Include="Classes\Functions\BoldOnHover.cs" />
     <Compile Include="Classes\Functions\Extensions.cs" />
     <Compile Include="Classes\Functions\JSONHandler.cs" />

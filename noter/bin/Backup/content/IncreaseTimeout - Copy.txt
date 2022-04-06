@@ -1,7 +1,0 @@
-You navigate to the iSAMS directory -> ISAMS.MultiBrowser -> iSAMS.Legacy
-
-Edit the web.config file
-
-Change the following attribute
-
-defaultCommandTimeout=”30”

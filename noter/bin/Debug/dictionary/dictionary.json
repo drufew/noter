@@ -1,8 +1,14 @@
 {
 	"fileTypes": [
-		{			
+		{
 			"txt": "_txt",
-			"directory": "_folder"
+			"directory": "_folder",
+			"xls": "_excel",
+			"xlsx": "_excel",
+			"pdf": "_pdf",
+			"sql": "_sql",
+			"docx": "_word",
+			"pptx": "_powerpoint"
 		}
 	]
 }	
